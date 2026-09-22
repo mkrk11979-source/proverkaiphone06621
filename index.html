@@ -517,8 +517,10 @@
             <label><input type="radio" name="battery" value="no" onchange="toggleSub('sub-batt', true); checkCompletion()"> <span data-i18n="battWorn">Изношен / Дефект</span></label>
         </div>
         <div id="sub-batt" class="sub-menu">
-            <label><input type="checkbox" id="chk-batt-wear" onchange="checkCompletion()"> <span data-i18n="b2">Износ (емкость &lt; 80% / «Сервис»)</span></label>
-            <label><input type="checkbox" id="chk-batt-swollen" onchange="checkCompletion()"> <span data-i18n="b_swollen">Вздутый АКБ</span></label>
+            <label><input type="checkbox" id="chk-batt-over80" data-penalty="3" onchange="checkCompletion()"> <span data-i18n="b_over80">Емкость &gt; 80%</span></label>
+            <label><input type="checkbox" id="chk-batt-70-80" data-penalty="6" onchange="checkCompletion()"> <span data-i18n="b_70_80">Емкость 70% – 80% (Сервис)</span></label>
+            <label><input type="checkbox" id="chk-batt-under70" data-penalty="10" onchange="checkCompletion()"> <span data-i18n="b_under70">Емкость &lt; 70%</span></label>
+            <label><input type="checkbox" id="chk-batt-swollen" data-penalty="15" onchange="checkCompletion()"> <span data-i18n="b_swollen">Вздутый АКБ</span></label>
         </div>
     </div>
 
@@ -664,7 +666,7 @@
             ttYes: "True Tone есть", ttNo: "Нет True Tone",
             battOrigRepl: "Оригинальный аккумулятор", battCopyRepl: "Неоригинальный / Копия",
             batt100: "100% / Отлично", battWorn: "Изношен / Дефект",
-            b2: "Износ (емкость < 80% / «Сервис»)", b_swollen: "Вздутый АКБ",
+            b_over80: "Емкость > 80%", b_70_80: "Емкость 70% – 80% (Сервис)", b_under70: "Емкость < 70%", b_swollen: "Вздутый АКБ",
             camOrigRepl: "Оригинальная камера", camCopyRepl: "Неоригинальная / Копия",
             cm1: "Пятна на линзе / матрице", cm2: "Тряска при зуме / Нет фокуса",
             micOk: "Все работают идеально", micBad: "Есть дефекты звука",
@@ -692,7 +694,6 @@
             factBattReplaced: "Аккумулятор менялся (не заводской)",
             factBattTypeOrig: "Тип замены аккумулятора: установлен оригинальный аккумулятор",
             factBattTypeCopy: "Тип замены аккумулятора: установлен неоригинальный аккумулятор (копия)",
-            factBattWear: "Износ аккумулятора",
             factCamReplaced: "Модуль камер менялся",
             factCamTypeOrig: "Тип замены камеры: установлена оригинальная камера",
             factCamTypeCopy: "Тип замены камеры: установлена неоригинальная камера (копия)",
@@ -753,7 +754,7 @@
             ttYes: "True Tone present", ttNo: "No True Tone",
             battOrigRepl: "Original battery", battCopyRepl: "Non-original / Copy",
             batt100: "100% / Mint", battWorn: "Worn / Defect",
-            b2: "Wear (capacity < 80% / «Service»)", b_swollen: "Swollen battery",
+            b_over80: "Capacity > 80%", b_70_80: "Capacity 70% – 80% (Service)", b_under70: "Capacity < 70%", b_swollen: "Swollen battery",
             camOrigRepl: "Original camera", camCopyRepl: "Non-original / Copy",
             cm1: "Spots on lens / matrix", cm2: "Zoom shaking / No focus",
             micOk: "All working perfectly", micBad: "Sound defects",
@@ -781,7 +782,6 @@
             factBattReplaced: "Battery was replaced (non-factory)",
             factBattTypeOrig: "Battery replacement type: original battery installed",
             factBattTypeCopy: "Battery replacement type: non-original battery (copy) installed",
-            factBattWear: "Battery wear",
             factCamReplaced: "Camera module was replaced",
             factCamTypeOrig: "Camera replacement type: original camera installed",
             factCamTypeCopy: "Camera replacement type: non-original camera (copy) installed",
@@ -842,7 +842,7 @@
             ttYes: "有原彩显示 (True Tone)", ttNo: "无原彩显示",
             battOrigRepl: "原装电池", battCopyRepl: "非原装 / 组装电池",
             batt100: "100% / 极佳", battWorn: "老化损耗",
-            b2: "损耗 (容量 < 80% / «维修»)", b_swollen: "电池鼓包",
+            b_over80: "电池容量 > 80%", b_70_80: "电池容量 70% – 80% (维修)", b_under70: "电池容量 < 70%", b_swollen: "电池鼓包",
             camOrigRepl: "原装相机", camCopyRepl: "非原装 / 组装相机",
             cm1: "镜片/感光元件有斑点", cm2: "变焦抖动 / 无法对焦",
             micOk: "全部完美工作", micBad: "声音有瑕疵",
@@ -870,7 +870,6 @@
             factBattReplaced: "电池已更换（非原厂）",
             factBattTypeOrig: "电池更换类型：已安装原装电池",
             factBattTypeCopy: "电池更换类型：已安装非原装电池（组装电池）",
-            factBattWear: "电池损耗",
             factCamReplaced: "相机模组已更换",
             factCamTypeOrig: "相机更换类型：已安装原装相机",
             factCamTypeCopy: "相机更换类型：已安装非原装相机（组装相机）",
@@ -1421,40 +1420,47 @@
         const isCopyBatt = isReplacedBatt && battTypeRadio && battTypeRadio.value === 'copy_replaced';
 
         const isSwollen = document.getElementById('chk-batt-swollen')?.checked;
-        const isWorn = document.getElementById('chk-batt-wear')?.checked;
+        const isOver80 = document.getElementById('chk-batt-over80')?.checked;
+        const is70to80 = document.getElementById('chk-batt-70-80')?.checked;
+        const isUnder70 = document.getElementById('chk-batt-under70')?.checked;
 
-        if (isSwollen && isCopyBatt) {
-            let p = segment === 'budget' ? 12 : (segment === 'mid' ? 7 : 5);
-            battPenaltyPct += p;
-            defectCount += 2;
-            battDefectsList.push({ text: t.comboSwollenCopy || "Вздутый + неоригинал (комбо)", pct: p });
-        } else {
-            if (isSwollen) {
-                let p = segment === 'budget' ? 10 : (segment === 'mid' ? 6 : 4);
-                battPenaltyPct += p;
-                defectCount++;
-                battDefectsList.push({ text: t.b_swollen, pct: p });
-            }
-            if (isCopyBatt) {
-                let p = segment === 'budget' ? 7 : (segment === 'mid' ? 4 : 3);
-                battPenaltyPct += p;
-                defectCount++;
-                battDefectsList.push({ text: t.factBattTypeCopy, pct: p });
-            } else if (isReplacedBatt) {
-                battPenaltyPct += 3;
-                defectCount++;
-                battDefectsList.push({ text: t.factBattTypeOrig, pct: 3 });
-            }
-        }
-
-        if (isWorn && !isSwollen) {
-            let p = segment === 'budget' ? 8 : (segment === 'mid' ? 5 : 3);
+        if (isSwollen) {
+            let p = 15;
             battPenaltyPct += p;
             defectCount++;
-            battDefectsList.push({ text: t.b2, pct: p });
+            battDefectsList.push({ text: t.b_swollen, pct: p });
+        }
+        if (isCopyBatt) {
+            let p = segment === 'budget' ? 7 : (segment === 'mid' ? 4 : 3);
+            battPenaltyPct += p;
+            defectCount++;
+            battDefectsList.push({ text: t.factBattTypeCopy, pct: p });
+        } else if (isReplacedBatt) {
+            battPenaltyPct += 3;
+            defectCount++;
+            battDefectsList.push({ text: t.factBattTypeOrig, pct: 3 });
         }
 
-        let maxBattCapPct = segment === 'budget' ? 12 : (segment === 'mid' ? 7 : 5);
+        if (isOver80) {
+            let p = 3;
+            battPenaltyPct += p;
+            defectCount++;
+            battDefectsList.push({ text: t.b_over80, pct: p });
+        }
+        if (is70to80) {
+            let p = 6;
+            battPenaltyPct += p;
+            defectCount++;
+            battDefectsList.push({ text: t.b_70_80, pct: p });
+        }
+        if (isUnder70) {
+            let p = 10;
+            battPenaltyPct += p;
+            defectCount++;
+            battDefectsList.push({ text: t.b_under70, pct: p });
+        }
+
+        let maxBattCapPct = segment === 'budget' ? 18 : (segment === 'mid' ? 12 : 8);
         let finalBattPenaltyPct = Math.min(battPenaltyPct, maxBattCapPct);
 
         let battMoneyDeduction = Math.round(basePrice * (finalBattPenaltyPct / 100));
