@@ -698,7 +698,8 @@
             factCamTypeCopy: "Тип замены камеры: установлена неоригинальная камера (копия)",
             factCamDefect: "Дефект работы камеры",
             factMicDefect: "Проблема со звуком/микрофоном",
-            factNetDefect: "Связь и датчики"
+            factNetDefect: "Связь и датчики",
+            currencyHintText: "Валюта: {code} (нажмите на цену для смены)"
         },
         en: {
             modeTitle: "Check iPhone Value", modeSub: "Select assessment goal:",
@@ -786,7 +787,8 @@
             factCamTypeCopy: "Camera replacement type: non-original camera (copy) installed",
             factCamDefect: "Camera operation defect",
             factMicDefect: "Sound/microphone issue",
-            factNetDefect: "Connectivity and sensors"
+            factNetDefect: "Connectivity and sensors",
+            currencyHintText: "Currency: {code} (click price to change)"
         },
         zh: {
             modeTitle: "查询苹果手机价格", modeSub: "选择评估目的：",
@@ -874,7 +876,8 @@
             factCamTypeCopy: "相机更换类型：已安装非原装相机（组装相机）",
             factCamDefect: "相机工作异常",
             factMicDefect: "声音/麦克风故障",
-            factNetDefect: "网络与传感器故障"
+            factNetDefect: "网络与传感器故障",
+            currencyHintText: "货币: {code} (点击价格可切换)"
         }
     };
 
@@ -1357,7 +1360,7 @@
             let p = segment === 'budget' ? 20 : (segment === 'mid' ? 15 : 10);
             screenPenaltyPct += p;
             defectCount += 2;
-            screenDefectsList.push({ text: "Неоригинал + трещины/засветы (комбо)", pct: p });
+            screenDefectsList.push({ text: t.comboCopyCracks || "Неоригинал + трещины/засветы (комбо)", pct: p });
         } else {
             if (isReplacedDisp) {
                 let p = isCopyDisp ? (segment === 'budget' ? 12 : (segment === 'mid' ? 8 : 6)) : 5;
@@ -1375,13 +1378,13 @@
                 let p = segment === 'budget' ? 10 : (segment === 'mid' ? 7 : 4);
                 screenPenaltyPct += p;
                 defectCount++;
-                screenDefectsList.push({ text: "Битые пиксели / Засветы", pct: p });
+                screenDefectsList.push({ text: t.pixelsOrLights || "Битые пиксели / Засветы", pct: p });
             }
             if (hasSpots || hasDeadzone) {
                 let p = segment === 'budget' ? 20 : (segment === 'mid' ? 15 : 10);
                 screenPenaltyPct += p;
                 defectCount++;
-                screenDefectsList.push({ text: "Мертвые зоны / Пятна матрицы", pct: p });
+                screenDefectsList.push({ text: t.spotsOrDeadzone || "Мертвые зоны / Пятна матрицы", pct: p });
             }
         }
 
@@ -1424,7 +1427,7 @@
             let p = segment === 'budget' ? 12 : (segment === 'mid' ? 7 : 5);
             battPenaltyPct += p;
             defectCount += 2;
-            battDefectsList.push({ text: "Вздутый + неоригинал (комбо)", pct: p });
+            battDefectsList.push({ text: t.comboSwollenCopy || "Вздутый + неоригинал (комбо)", pct: p });
         } else {
             if (isSwollen) {
                 let p = segment === 'budget' ? 10 : (segment === 'mid' ? 6 : 4);
@@ -1467,7 +1470,6 @@
         }
 
         // --- ДРУГИЕ ДЕФЕКТЫ ---
-        // Биометрия
         const bioRadio = document.querySelector('input[name="biometry"]:checked');
         if (bioRadio && bioRadio.value === 'no') {
             let p = parseInt(bioRadio.getAttribute('data-penalty')) || 15;
@@ -1476,7 +1478,6 @@
             details.push({ text: t.factBioNotWorking, val: `-${p}%`, type: "penalty" });
         }
 
-        // True Tone
         const ttRadio = document.querySelector('input[name="truetone"]:checked');
         if (ttRadio && ttRadio.value === 'no') {
             let p = parseInt(ttRadio.getAttribute('data-penalty')) || 10;
@@ -1485,7 +1486,6 @@
             details.push({ text: t.factTrueToneNo, val: `-${p}%`, type: "penalty" });
         }
 
-        // Кнопки
         const btnRadio = document.querySelector('input[name="buttons_status"]:checked');
         if (btnRadio && btnRadio.value !== 'ok') {
             let p = parseInt(btnRadio.getAttribute('data-penalty')) || 10;
@@ -1494,7 +1494,6 @@
             details.push({ text: t.factBtnState, val: `-${p}%`, type: "penalty" });
         }
 
-        // NFC
         const nfcRadio = document.querySelector('input[name="nfc_status"]:checked');
         if (nfcRadio && nfcRadio.value === 'no') {
             let p = parseInt(nfcRadio.getAttribute('data-penalty')) || 15;
@@ -1503,7 +1502,6 @@
             details.push({ text: t.factNfcNo, val: `-${p}%`, type: "penalty" });
         }
 
-        // Камеры
         const camOrigRadio = document.querySelector('input[name="cam_orig"]:checked');
         if (camOrigRadio && camOrigRadio.value === 'replaced') {
             const camTypeRadio = document.querySelector('input[name="cam_type"]:checked');
@@ -1528,7 +1526,6 @@
             });
         }
 
-        // Микрофоны
         const micStatusRadio = document.querySelector('input[name="mics"]:checked');
         if (micStatusRadio && micStatusRadio.value === 'no') {
             const micChecks = document.querySelectorAll('#sub-mics input[type="checkbox"]:checked');
@@ -1542,7 +1539,6 @@
             });
         }
 
-        // Связь и датчики
         const netStatusRadio = document.querySelector('input[name="network"]:checked');
         if (netStatusRadio && netStatusRadio.value === 'no') {
             const netChecks = document.querySelectorAll('#sub-net input[type="checkbox"]:checked');
@@ -1557,7 +1553,7 @@
         }
 
         // =========================================================
-        // 🛠️ РАСЧЕТ ДИНАМИЧЕСКОГО КОЭФФИЦИЕНТА ДЕФЕКТОВ
+        // 🛠️ КОЭФФИЦИЕНТ ОПТА ДЕФЕКТОВ
         // =========================================================
         let defectMultiplier = 1.0;
         if (defectCount === 4) defectMultiplier = 0.85;
@@ -1569,14 +1565,14 @@
         fixedDeductionsRUB = Math.round(fixedDeductionsRUB * defectMultiplier);
 
         if (defectCount >= 4) {
+            let multTextTemplate = t.defectMultText || "Применен коэффициент за опт дефектов ({count} шт)";
             details.push({
-                text: `Применен коэффициент за опт дефектов (${defectCount} шт)`,
+                text: multTextTemplate.replace('{count}', defectCount),
                 val: `x${defectMultiplier}`,
                 type: "bonus"
             });
         }
 
-        // --- ИТОГОВЫЙ РАСЧЕТ ЦЕНЫ ---
         let calculatedPrice = basePrice * (1 - totalPenaltyPercent / 100) - fixedDeductionsRUB;
         
         let minPriceFloor = Math.round(basePrice * 0.15);
@@ -1616,6 +1612,7 @@
         let formattedPrice = convertedPrice.toLocaleString('ru-RU') + " " + curr.symbol;
 
         let hasDefects = details.some(d => d.type === 'penalty');
+        let hintText = (t.currencyHintText || "Валюта: {code} (нажмите на цену для смены)").replace('{code}', curr.code);
 
         if (userMode === 'sell') {
             let recommendedPrice = Math.round(convertedPrice * 1.07);
@@ -1626,7 +1623,7 @@
                     <span class="price-badge badge-green">${t.modeSellBadge}</span>
                     <div style="font-size: 13px; font-weight: 600; color: var(--muted); margin-top: 4px;">${t.recPriceLabel}</div>
                     <div class="price-val" onclick="cycleCurrency()" title="Нажмите для смены валюты">${recommendedPrice.toLocaleString('ru-RU')} ${curr.symbol}</div>
-                    <div class="currency-hint">Валюта: ${curr.code} (нажмите на цену для смены)</div>
+                    <div class="currency-hint">${hintText}</div>
                 </div>
                 <div class="price-row">
                     <span class="price-badge badge-blue">${t.minPriceBadge}</span>
@@ -1641,7 +1638,7 @@
                     <span class="price-badge badge-blue">${t.modeBuyBadge}</span>
                     <div style="font-size: 13px; font-weight: 600; color: var(--muted); margin-top: 4px;">${t.buyPriceLabel}</div>
                     <div class="price-val" onclick="cycleCurrency()" title="Нажмите для смены валюты">${formattedPrice}</div>
-                    <div class="currency-hint">Валюта: ${curr.code} (нажмите на цену для смены)</div>
+                    <div class="currency-hint">${hintText}</div>
                 </div>
                 <div class="price-explanation">${reasonText}</div>
             `;
@@ -1678,7 +1675,7 @@
             <div style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 10px; font-size: 14px;">
                 <strong>${t.finalIndexLabel}</strong> <span style="color: var(--blue); font-weight: bold;">${lastFinalScore}%</span>
             </div>
-            <button class="settings-close" onclick="document.getElementById('details-modal').style.display='none'" style="margin-top: 15px;"> Закрыть</button>
+            <button class="settings-close" onclick="document.getElementById('details-modal').style.display='none'" style="margin-top: 15px;">${t.closeBtn || "Закрыть"}</button>
         `;
     }
 </script>
